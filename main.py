@@ -1,9 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import numpy as np
-
 import matplotlib.pyplot as plt
-
 sns.set_style("ticks")
 sns.set_context("paper")
 
@@ -11,7 +9,6 @@ sns.set_context("paper")
 # For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
 
 from subprocess import check_output
-print(check_output(["dir", "input"], shell=True).decode("utf8"))
 
 df_cdrs = pd.DataFrame({})
 for i in range(1, 8):
@@ -26,17 +23,69 @@ print(df_cdrs.head())
 df_cdrs_internet = df_cdrs[['datetime', 'CellID', 'internet', 'calls', 'sms']].groupby(['datetime', 'CellID'], as_index=False).sum()
 df_cdrs_internet['hour'] = df_cdrs_internet.datetime.dt.hour+24*(df_cdrs_internet.datetime.dt.day-1)
 df_cdrs_internet = df_cdrs_internet.set_index(['hour']).sort_index()
-#print(df_cdrs_internet)
+
+df_cdrs_group = df_cdrs[['datetime', 'CellID', 'internet', 'calls', 'sms']].groupby(['datetime', 'CellID'], as_index=False).sum()
+df_cdrs_group['hour'] = df_cdrs_group.datetime.dt.hour+24*(df_cdrs_group.datetime.dt.day-1)
+df_cdrs_group['groupId'] = ((df_cdrs_group.CellID - 1) % 100 / 25).astype(int) + ((df_cdrs_group.CellID - 1) / 100 / 25).astype(int) * 4 + 1
+df_cdrs_group = df_cdrs_group[['groupId','hour','internet','calls','sms']].groupby(['hour','groupId'], as_index=False).sum()
+df_cdrs_group = df_cdrs_group.set_index(['hour']).sort_index()
+
+
+print(df_cdrs_internet)
+print(df_cdrs_group)
+
 
 f = plt.figure()
 
 ax = df_cdrs_internet[df_cdrs_internet.CellID==5060]['internet'].plot(label='Duomo')
 df_cdrs_internet[df_cdrs_internet.CellID==4259]['internet'].plot(ax=ax, label='Bocconi')
 df_cdrs_internet[df_cdrs_internet.CellID==4456]['internet'].plot(ax=ax, label='Navigli')
+
+
 plt.xlabel("Weekly hour")
 plt.ylabel("Number of connections")
 sns.despine()
 
+f2 = plt.figure()
+
+
+ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['internet'] / 5).plot(label=f'Group: 1')
+for g in range(2,17):
+    (df_cdrs_group[df_cdrs_group.groupId == g]['internet'] / 5).plot(ax=ax, label=f'Group: {g}')
+
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+f2 = plt.figure()
+
+ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['calls'] / 5).plot(label=f'Group: 1')
+for g in range(2,17):
+    (df_cdrs_group[df_cdrs_group.groupId == g]['calls'] / 5).plot(ax=ax, label=f'Group: {g}')
+
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+
+f2 = plt.figure()
+
+ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['sms'] / 5).plot(label=f'Group: 1')
+for g in range(2,17):
+    (df_cdrs_group[df_cdrs_group.groupId == g]['sms'] / 5).plot(ax=ax, label=f'Group: {g}')
+
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+
+
+plt.show()
+
+'''
 # Shrink current axis's height by 10% on the bottom
 box = ax.get_position()
 ax.set_position([box.x0, box.y0 + box.height * 0.1,
@@ -620,3 +669,4 @@ ax.axis('scaled')
 
 
 plt.show()
+'''
