@@ -22,14 +22,20 @@ print(df_cdrs.head())
 
 df_cdrs_internet = df_cdrs[['datetime', 'CellID', 'internet', 'calls', 'sms']].groupby(['datetime', 'CellID'], as_index=False).sum()
 df_cdrs_internet['hour'] = df_cdrs_internet.datetime.dt.hour+24*(df_cdrs_internet.datetime.dt.day-1)
+df_cdrs_internet['groupId'] = ((df_cdrs_internet.CellID - 1) % 100 / 25).astype(int) + ((df_cdrs_internet.CellID - 1) / 100 / 25).astype(int) * 4 + 1
+df_cdrs_internet['sectorId'] = ((df_cdrs_internet.CellID - 1) % 100 / 5).astype(int) + ((df_cdrs_internet.CellID - 1) / 100 / 5).astype(int) * 20 + 1
 df_cdrs_internet = df_cdrs_internet.set_index(['hour']).sort_index()
 
 df_cdrs_group = df_cdrs[['datetime', 'CellID', 'internet', 'calls', 'sms']].groupby(['datetime', 'CellID'], as_index=False).sum()
 df_cdrs_group['hour'] = df_cdrs_group.datetime.dt.hour+24*(df_cdrs_group.datetime.dt.day-1)
 df_cdrs_group['groupId'] = ((df_cdrs_group.CellID - 1) % 100 / 25).astype(int) + ((df_cdrs_group.CellID - 1) / 100 / 25).astype(int) * 4 + 1
+df_cdrs_group['sectorId'] = ((df_cdrs_group.CellID - 1) % 100 / 5).astype(int) + ((df_cdrs_group.CellID - 1) / 100 / 5).astype(int) * 20 + 1
+
+df_cdrs_sector = df_cdrs_group[['sectorId','hour','internet','calls','sms']].groupby(['hour','sectorId'], as_index=False).sum()
+df_cdrs_sector = df_cdrs_sector.set_index(['hour']).sort_index()
+
 df_cdrs_group = df_cdrs_group[['groupId','hour','internet','calls','sms']].groupby(['hour','groupId'], as_index=False).sum()
 df_cdrs_group = df_cdrs_group.set_index(['hour']).sort_index()
-
 
 print(df_cdrs_internet)
 print(df_cdrs_group)
@@ -37,21 +43,76 @@ print(df_cdrs_group)
 
 f = plt.figure()
 
-ax = df_cdrs_internet[df_cdrs_internet.CellID==5060]['internet'].plot(label='Duomo')
-df_cdrs_internet[df_cdrs_internet.CellID==4259]['internet'].plot(ax=ax, label='Bocconi')
-df_cdrs_internet[df_cdrs_internet.CellID==4456]['internet'].plot(ax=ax, label='Navigli')
+ax = df_cdrs_internet[df_cdrs_internet.CellID==5060]['internet'].plot(label='Duomo') # 11
+df_cdrs_internet[df_cdrs_internet.CellID==4259]['internet'].plot(ax=ax, label='Bocconi') # 7
+df_cdrs_internet[df_cdrs_internet.CellID==4456]['internet'].plot(ax=ax, label='Navigli') # 7
 
-
+plt.legend(loc='best')
 plt.xlabel("Weekly hour")
 plt.ylabel("Number of connections")
 sns.despine()
 
 f2 = plt.figure()
-
-
-ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['internet'] / 5).plot(label=f'Group: 1')
+ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['internet']).plot(label=f'Group: 1')
 for g in range(2,17):
-    (df_cdrs_group[df_cdrs_group.groupId == g]['internet'] / 5).plot(ax=ax, label=f'Group: {g}')
+    (df_cdrs_group[df_cdrs_group.groupId == g]['internet']).plot(ax=ax, label=f'Group: {g}')
+
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+sectorList = []
+for i,g in df_cdrs_internet.iterrows():
+    if g.groupId == 7:
+        if g.sectorId not in sectorList:
+            sectorList.append(g.sectorId)
+
+cnt = 0
+f2 = plt.figure()
+for sec in sectorList:
+    if cnt == 0:
+        ax = (df_cdrs_sector[df_cdrs_sector.sectorId == sec]['internet']).plot(label=f'Sector: {sec}')
+    else:
+        df_cdrs_sector[df_cdrs_sector.sectorId==sec]['internet'].plot(ax=ax, label=f'Sector {sec}')
+    cnt += 1
+
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+sectorList = []
+for i,g in df_cdrs_internet.iterrows():
+    if g.groupId == 11:
+        if g.sectorId not in sectorList:
+            sectorList.append(g.sectorId)
+
+cnt = 0
+f2 = plt.figure()
+for sec in sectorList:
+    if cnt == 0:
+        ax = (df_cdrs_sector[df_cdrs_sector.sectorId == sec]['internet']).plot(label=f'Sector: {sec}')
+    else:
+        df_cdrs_sector[df_cdrs_sector.sectorId==sec]['internet'].plot(ax=ax, label=f'Sector {sec}')
+    cnt += 1
+
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+
+f2 = plt.figure()
+ax = (df_cdrs_sector[df_cdrs_sector.sectorId == 211]['internet']).plot(label=f'Sector {211}')
+df_cdrs_sector[df_cdrs_sector.sectorId==212]['internet'].plot(ax=ax, label=f'Sector {212}')
+df_cdrs_sector[df_cdrs_sector.sectorId==213]['internet'].plot(ax=ax, label=f'Sector {213}')
+df_cdrs_sector[df_cdrs_sector.sectorId==231]['internet'].plot(ax=ax, label=f'Sector {231}')
+df_cdrs_sector[df_cdrs_sector.sectorId==232]['internet'].plot(ax=ax, label=f'Sector {232}')
+df_cdrs_sector[df_cdrs_sector.sectorId==233]['internet'].plot(ax=ax, label=f'Sector {233}')
+df_cdrs_sector[df_cdrs_sector.sectorId==251]['internet'].plot(ax=ax, label=f'Sector {251}')
+df_cdrs_sector[df_cdrs_sector.sectorId==252]['internet'].plot(ax=ax, label=f'Sector {252}')
+df_cdrs_sector[df_cdrs_sector.sectorId==253]['internet'].plot(ax=ax, label=f'Sector {253}')
 
 plt.xlabel("Weekly hour")
 plt.ylabel("Number of connections")
@@ -59,10 +120,31 @@ plt.legend(loc='best')
 sns.despine()
 
 f2 = plt.figure()
+ax = (df_cdrs_sector[df_cdrs_sector.sectorId == 213]['internet']).plot(label=f'Sector {213}')
+df_cdrs_sector[df_cdrs_sector.sectorId==214]['internet'].plot(ax=ax, label=f'Sector {214}')
+df_cdrs_sector[df_cdrs_sector.sectorId==215]['internet'].plot(ax=ax, label=f'Sector {215}')
+df_cdrs_sector[df_cdrs_sector.sectorId==233]['internet'].plot(ax=ax, label=f'Sector {233}')
+df_cdrs_sector[df_cdrs_sector.sectorId==234]['internet'].plot(ax=ax, label=f'Sector {234}')
+df_cdrs_sector[df_cdrs_sector.sectorId==235]['internet'].plot(ax=ax, label=f'Sector {235}')
+df_cdrs_sector[df_cdrs_sector.sectorId==253]['internet'].plot(ax=ax, label=f'Sector {253}')
+df_cdrs_sector[df_cdrs_sector.sectorId==254]['internet'].plot(ax=ax, label=f'Sector {254}')
+df_cdrs_sector[df_cdrs_sector.sectorId==255]['internet'].plot(ax=ax, label=f'Sector {255}')
 
-ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['calls'] / 5).plot(label=f'Group: 1')
-for g in range(2,17):
-    (df_cdrs_group[df_cdrs_group.groupId == g]['calls'] / 5).plot(ax=ax, label=f'Group: {g}')
+plt.xlabel("Weekly hour")
+plt.ylabel("Number of connections")
+plt.legend(loc='best')
+sns.despine()
+
+f2 = plt.figure()
+ax = (df_cdrs_sector[df_cdrs_sector.sectorId == 251]['internet']).plot(label=f'Sector {251}')
+df_cdrs_sector[df_cdrs_sector.sectorId==252]['internet'].plot(ax=ax, label=f'Sector {252}')
+df_cdrs_sector[df_cdrs_sector.sectorId==253]['internet'].plot(ax=ax, label=f'Sector {253}')
+df_cdrs_sector[df_cdrs_sector.sectorId==271]['internet'].plot(ax=ax, label=f'Sector {271}')
+df_cdrs_sector[df_cdrs_sector.sectorId==272]['internet'].plot(ax=ax, label=f'Sector {272}')
+df_cdrs_sector[df_cdrs_sector.sectorId==273]['internet'].plot(ax=ax, label=f'Sector {273}')
+df_cdrs_sector[df_cdrs_sector.sectorId==291]['internet'].plot(ax=ax, label=f'Sector {291}')
+df_cdrs_sector[df_cdrs_sector.sectorId==292]['internet'].plot(ax=ax, label=f'Sector {292}')
+df_cdrs_sector[df_cdrs_sector.sectorId==293]['internet'].plot(ax=ax, label=f'Sector {293}')
 
 plt.xlabel("Weekly hour")
 plt.ylabel("Number of connections")
@@ -70,11 +152,17 @@ plt.legend(loc='best')
 sns.despine()
 
 
-f2 = plt.figure()
 
-ax = (df_cdrs_group[df_cdrs_group.groupId == 1]['sms'] / 5).plot(label=f'Group: 1')
-for g in range(2,17):
-    (df_cdrs_group[df_cdrs_group.groupId == g]['sms'] / 5).plot(ax=ax, label=f'Group: {g}')
+f2 = plt.figure()
+ax = (df_cdrs_sector[df_cdrs_sector.sectorId == 253]['internet']).plot(label=f'Sector {253}')
+df_cdrs_sector[df_cdrs_sector.sectorId==254]['internet'].plot(ax=ax, label=f'Sector {254}')
+df_cdrs_sector[df_cdrs_sector.sectorId==255]['internet'].plot(ax=ax, label=f'Sector {255}')
+df_cdrs_sector[df_cdrs_sector.sectorId==273]['internet'].plot(ax=ax, label=f'Sector {273}')
+df_cdrs_sector[df_cdrs_sector.sectorId==274]['internet'].plot(ax=ax, label=f'Sector {274}')
+df_cdrs_sector[df_cdrs_sector.sectorId==275]['internet'].plot(ax=ax, label=f'Sector {275}')
+df_cdrs_sector[df_cdrs_sector.sectorId==293]['internet'].plot(ax=ax, label=f'Sector {293}')
+df_cdrs_sector[df_cdrs_sector.sectorId==294]['internet'].plot(ax=ax, label=f'Sector {294}')
+df_cdrs_sector[df_cdrs_sector.sectorId==295]['internet'].plot(ax=ax, label=f'Sector {295}')
 
 plt.xlabel("Weekly hour")
 plt.ylabel("Number of connections")
