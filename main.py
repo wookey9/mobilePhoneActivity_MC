@@ -221,11 +221,21 @@ for sec in target_cell_list:
     plt.legend(loc='best')
     sns.despine()
 
-
+for i, m in enumerate(model_list):
+    torch.save(m, 'lstm_model_' + str(i))
 
 f2 = plt.figure()
+df_merge = pd.DataFrame({})
 for sec in target_cell_list:
+    if len(df_merge) == 0:
+        df_merge = df_cdrs_sector[df_cdrs_sector.sectorId == sec]['internet']
+    else:
+        df_merge = pd.merge(df_merge, df_cdrs_sector[df_cdrs_sector.sectorId == sec]['internet'], left_index=True, right_index=True, suffixes=("",str(sec)))
+
     plt.plot(df_cdrs_sector[df_cdrs_sector.sectorId == sec]['convInternet'], label=f'Sector {sec}')
+
+df_merge.to_pickle('input.pkl')
+
 plt.xlabel("Weekly hour")
 plt.ylabel("Number of connections")
 plt.legend(loc='best')
