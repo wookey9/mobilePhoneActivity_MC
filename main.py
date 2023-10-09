@@ -162,7 +162,7 @@ for sec in target_cell_list:
     y = df_cdrs_sector[df_cdrs_sector.sectorId == sec]['convInternet'].values
 
     # Create sequences from the sine wave
-    seq_length = 10
+    seq_length = 5
 
     x, y = create_sequences(y, seq_length)
     x = torch.tensor(x, dtype=torch.float32).unsqueeze(2)
