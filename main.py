@@ -21,11 +21,12 @@ if os.path.exists("df_cdrs.pkl"):
 else:
     file_list = os.listdir('./input/')
     df_cdrs = pd.DataFrame({})
-    for f in file_list:
-        if 'sms-call-internet-mi-' in f:
-            df = pd.read_csv('./input/' + f, parse_dates=['datetime'])
-            df_cdrs = pd.concat([df_cdrs, df])
-            print(f)
+    for i,f in enumerate(file_list):
+        if i < 30:
+            if 'sms-call-internet-mi-' in f:
+                df = pd.read_csv('./input/' + f, parse_dates=['datetime'])
+                df_cdrs = pd.concat([df_cdrs, df])
+                print(f)
 
     print('Data load done.')
 
@@ -232,13 +233,13 @@ for sec in target_cell_list:
     else:
         df_merge = pd.merge(df_merge, df_cdrs_sector[df_cdrs_sector.sectorId == sec]['internet'], left_index=True, right_index=True, suffixes=("",str(sec)))
 
-    plt.plot(df_cdrs_sector[df_cdrs_sector.sectorId == sec]['convInternet'], label=f'Sector {sec}')
+    plt.plot(df_cdrs_sector[df_cdrs_sector.sectorId == sec]['convInternet'][:250], label=f'Sector {sec}')
 
 df_merge.to_pickle('input.pkl')
 
-plt.xlabel("Weekly hour")
+plt.xlabel("Hour")
 plt.ylabel("Number of connections")
-plt.legend(loc='best')
+plt.legend(loc='upper right')
 sns.despine()
 
 
