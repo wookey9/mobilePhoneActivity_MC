@@ -1,17 +1,11 @@
 import pandas as pd
-import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
-import torch.nn as nn
-import torch.optim as optim
 import os
 from PIL import Image
 
-sns.set_style("ticks")
-sns.set_context("paper")
-
-file_list = os.listdir('./input/')
+#Data preprocessing
+'''file_list = os.listdir('./input/')
 target_cell_list = [4458,4459,4460,4558,4559,4560,4658,4659,4660]
 df_all = pd.DataFrame({})
 
@@ -52,8 +46,9 @@ if not os.path.exists("up_ratio.csv"):
     df_out_ratio = (df_out * 100 / (df_in + df_out))
     df_out_ratio.to_csv('up_ratio.csv')
 else:
-    df_out_ratio = pd.read_csv("up_ratio.csv")
+    df_out_ratio = pd.read_csv("up_ratio.csv")'''
 
+df_out_ratio = pd.read_csv("up_ratio.csv")
 df_out_ratio['0'].plot()
 plt.show()
 
