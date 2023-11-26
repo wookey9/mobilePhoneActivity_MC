@@ -36,14 +36,14 @@ if not os.path.exists("up_ratio.csv"):
     df_in = pd.DataFrame({})
     df_out = pd.DataFrame({})
     for cell in target_cell_list:
-        df = df_all[df_all.CellID == cell]['smsin'] + df_all[df_all.CellID == cell]['callin']
+        df = df_all[df_all.CellID == cell]['smsin']
         if len(df_in) == 0:
             df_in = df
         else:
             df_in = df_in + df
 
     for cell in target_cell_list:
-        df = df_all[df_all.CellID == cell]['smsout'] + df_all[df_all.CellID == cell]['callout']
+        df = df_all[df_all.CellID == cell]['smsout']
         if len(df_out) == 0:
             df_out = df
         else:
@@ -60,8 +60,8 @@ plt.show()
 df = df_out_ratio
 # row = 24
 # column = 15 ## IDS, Pangyo 데이터셋은 위 사이즈로 진행
-row = 20
-column = 15
+row = 12
+column = 12
 print(df.shape[0])
 print(df.max(axis=0)[1])
 print(df.min(axis=0)[1])
