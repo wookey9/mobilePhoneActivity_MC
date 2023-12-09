@@ -5,9 +5,12 @@ import os
 from PIL import Image
 
 #Data preprocessing
-'''file_list = os.listdir('./input/')
+file_list = os.listdir('./input/')
 target_cell_list = [4458,4459,4460,4558,4559,4560,4658,4659,4660]
 df_all = pd.DataFrame({})
+
+
+
 
 if os.path.exists("dataset.csv"):
     df_all = pd.read_csv("dataset.csv")
@@ -35,6 +38,9 @@ if not os.path.exists("up_ratio.csv"):
             df_in = df
         else:
             df_in = df_in + df
+        df.plot()
+
+    f = plt.figure()
 
     for cell in target_cell_list:
         df = df_all[df_all.CellID == cell]['smsout']
@@ -42,12 +48,21 @@ if not os.path.exists("up_ratio.csv"):
             df_out = df
         else:
             df_out = df_out + df
+        df.plot()
+
+    f = plt.figure()
 
     df_out_ratio = (df_out * 100 / (df_in + df_out))
     df_out_ratio.to_csv('up_ratio.csv')
-else:
-    df_out_ratio = pd.read_csv("up_ratio.csv")'''
 
+    f = plt.figure()
+    df_in.plot()
+    df_out.plot()
+else:
+    df_out_ratio = pd.read_csv("up_ratio.csv")
+
+
+f = plt.figure()
 df_out_ratio = pd.read_csv("up_ratio.csv")
 df_out_ratio['0'].plot()
 plt.show()
@@ -65,7 +80,7 @@ for a in range(int(df.shape[0] / (row*4))):
     im = image.load()
     (width, height) = image.size
     maxval = df.max(axis=0)[1]
-    minval = df.min(axis=0)[1]
+    minval = 0
     for i in range(0, height):
         for j in range(0, width):
             color = int(((df.values[(a * row * 4) + i * row + j][1]) - minval) / (maxval - minval)*255)

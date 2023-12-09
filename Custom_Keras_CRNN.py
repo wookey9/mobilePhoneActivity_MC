@@ -90,7 +90,7 @@ def prediction_part9():
         new_pos = seq.predict(track[np.newaxis, ::, ::, ::, ::])
         print("time :", time.time() - start1)
 
-        RMSE = mean_squared_error(y_test[which][6:, ::, 0], new_pos[0, 6:, ::, 0]) # 뒤에서 8분에 대한 RMSE 만약 12분이라면 13->12가 되어야하고 16분이면 13->11이 되어야함
+        RMSE = mean_squared_error(y_test[which][8:, ::, 0], new_pos[0, 8:, ::, 0]) # 뒤에서 8분에 대한 RMSE 만약 12분이라면 13->12가 되어야하고 16분이면 13->11이 되어야함
         arr_RMSE.append(RMSE)
 
         fig = plt.figure(figsize=(5, 5))
@@ -117,7 +117,7 @@ def prediction_part9():
 
 current_movies, predict_movies = generate_movies6(filenum=thenumberoffile, n_frames=time_step)
 
-x_train, x_test, y_train, y_test = train_test_split(current_movies, predict_movies, test_size=0.2, shuffle=True) ## 트레이닝시 셔플하지않으면 학습이 잘안됨
+x_train, x_test, y_train, y_test = train_test_split(current_movies, predict_movies, test_size=0.2, shuffle=False) ## 트레이닝시 셔플하지않으면 학습이 잘안됨
 
 start = time.time()
 hist = seq.fit(x_train, y_train, batch_size=10, epochs=epoch, validation_split=0.1, verbose=2, shuffle=False) ## 데이터셋을 셔플로 나누면 학습이 잘됨 하지만 고정된 테스트 데이터셋을 얻지못함
@@ -140,4 +140,6 @@ plt.ylabel('loss')
 plt.savefig('./results/myplot.png')
 
 prediction_part9()
+seq.save('crnn_model')
+
 
