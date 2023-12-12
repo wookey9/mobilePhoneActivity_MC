@@ -7,6 +7,14 @@ from keras.models import Sequential
 from keras.layers import LSTM, Dense
 from keras.preprocessing.sequence import TimeseriesGenerator
 
+def create_sequences_with_stride(data, input_sequence_length, output_sequence_length, stride):
+    X, y = [], []
+    for i in range(0, len(data) - input_sequence_length - output_sequence_length + 1, stride):
+        X.append(data[i:(i + input_sequence_length)])
+        y.append(data[(i + input_sequence_length):(i + input_sequence_length + output_sequence_length)])
+    return np.array(X), np.array(y)
+
+
 # Load the dataset
 df = pd.read_csv('up_ratio.csv')
 
@@ -26,27 +34,22 @@ input_sequence_length = 336
 output_sequence_length = 48
 
 # Generator for the training data
-train_generator = TimeseriesGenerator(train_data, train_data, length=input_sequence_length, batch_size=10)
-
-# Generator for the testing data
-test_generator = TimeseriesGenerator(test_data, test_data, length=input_sequence_length, batch_size=10)
+x_train, y_train = create_sequences_with_stride(train_data, input_sequence_length, output_sequence_length, 12)
+x_test, y_test = create_sequences_with_stride(test_data, input_sequence_length, output_sequence_length, 12)
 
 # Build the LSTM model
-model = Sequential()
-model.add(LSTM(10, activation='relu', return_sequences=True, input_shape=(input_sequence_length, 1)))
-model.add(LSTM(10, activation='relu', return_sequences=True))
-model.add(LSTM(10, activation='relu', return_sequences=True))
-model.add(LSTM(10, activation='relu'))
-model.add(Dense(output_sequence_length))
-
+model = Sequential([
+    LSTM(48, activation='relu', input_shape=(input_sequence_length, 1)),
+    Dense(output_sequence_length)
+])
 # Compile the model
 model.compile(optimizer='adam', loss='mse')
 
 # Train the model
-model.fit(train_generator, epochs=100)
+model.fit(x_train, y_train,batch_size=10,validation_split=0.1, epochs=100)
 
 # Evaluate the model on the test data
-loss = model.evaluate(test_generator)
+loss = model.evaluate(x_test, y_test)
 print(f'Test Loss: {loss}')
 
 # Predict future values
