@@ -66,7 +66,7 @@ def generate_movies6(filenum, n_frames): # 학습을 위해 이미지 -> 행렬�
     predict_movies = np.zeros((filenum - n_frames, row, col, 1), dtype=float)
     for j in range(filenum - n_frames):
         for f in range(n_frames):
-            if j + (f * 8) < filenum + 1:
+            if j + ((f + 1) * 8) < filenum + 1:
                 current_image = pilimg.open(fileaddress + str(j + (f * 8)) + '.png')
                 pix = np.array(current_image)
                 current_movies[j, f, :, :, 0] = pix.copy()
@@ -74,7 +74,7 @@ def generate_movies6(filenum, n_frames): # 학습을 위해 이미지 -> 행렬�
                 print(current_movies[j, f, :, :, 0])
                 if (f == n_frames - 1):
                     predict_image = pilimg.open(
-                        fileaddress + str(j + f + 1) + '.png')
+                        fileaddress + str(j + (f + 1) * 8) + '.png')
                     pix = np.array(predict_image)
                     predict_movies[j, :, :, 0] = pix.copy()
                     predict_movies[j, :, :, 0] = predict_movies[j, :, :, 0] / 255
