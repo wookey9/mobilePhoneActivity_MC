@@ -75,7 +75,7 @@ column = 12
 print(df.shape[0])
 print(df.max(axis=0)[1])
 print(df.min(axis=0)[1])
-for a in range(int(df.shape[0] / (row*4))):
+for a in range(int(df.shape[0] / 6)):
     image = Image.new("L", (row, column))
     im = image.load()
     (width, height) = image.size
@@ -83,7 +83,7 @@ for a in range(int(df.shape[0] / (row*4))):
     minval = 0
     for i in range(0, height):
         for j in range(0, width):
-            color = int(((df.values[(a * row * 4) + i * row + j][1]) - minval) / (maxval - minval)*255)
+            color = int(((df.values[(a * 6) + i * row + j][1]) - minval) / (maxval - minval)*255)
             im[j, i] = (255-color)
     imarr1 = np.asarray(image)
     print(imarr1)
